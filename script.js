@@ -111,6 +111,99 @@ const DATA_CARS = [
         color_theme: "#ff3b3b", // Red
         audioPath: "assets/Toyota/audio/audio.mp3",
         image: "assets/thumbnails/toyota.png"
+    },
+    // --- NEW CARS ---
+    {
+        brand: "CHEVROLET",
+        model: "Corvette ZR1 ZTK (C8)",
+        sub_model: "2025 Prototype",
+        price: "$190,000+ (Est.)",
+        rating: 5,
+        mods: ["ZTK Track Performance Pkg", "Carbon Fiber Wheels", "High-Downforce Aero"],
+        stats: {
+            hp: 1064,
+            torque: 850,
+            zeroSixty: 2.5,
+            handling: 95
+        },
+        tech: {
+            engine: "LT7 5.5L Twin-Turbo V8",
+            trans: "8-Speed DCT"
+        },
+        file_path: "assets/Chevrolet/2025_chevrolet_corvette_zr1_ztk_track_c8.glb",
+        audioPath: "assets/Chevrolet/audio/audio.mp3",
+        cam_orbit: "45deg 75deg 5m",
+        color_theme: "#ffe600", // Yellow
+        image: "assets/thumbnails/chevrolet.png"
+    },
+    {
+        brand: "LAMBORGHINI",
+        model: "Huracán EVO",
+        sub_model: "LP 640-4",
+        price: "$261,274",
+        rating: 5,
+        mods: ["LDVI Dynamics System", "Titanium Exhaust", "Forged Rims"],
+        stats: {
+            hp: 640,
+            torque: 443,
+            zeroSixty: 2.9,
+            handling: 90
+        },
+        tech: {
+            engine: "5.2L NA V10",
+            trans: "7-Speed LDF Dual-Clutch"
+        },
+        file_path: "assets/Lamborghini/2019_lamborghini_huracan_evo.glb",
+        audioPath: "assets/Lamborghini/audio/audio.mp3",
+        cam_orbit: "-35deg 82deg 6.5m",
+        color_theme: "#45ff00", // Green
+        image: "assets/thumbnails/lamborghini.png"
+    },
+    {
+        brand: "SHELBY",
+        model: "Super Snake S650",
+        sub_model: "Widebody Edition",
+        price: "$160,000+",
+        rating: 5,
+        mods: ["Super Snake Widebody", "Borla Exhaust", "Shelby Forged Wheels", "Brembo Brakes"],
+        stats: {
+            hp: 830,
+            torque: 625,
+            zeroSixty: 3.2,
+            handling: 88
+        },
+        tech: {
+            engine: "5.0L Supercharged Coyote V8",
+            trans: "Manual/Auto"
+        },
+        file_path: "assets/Ford/2024_ford_shelby_super_snake_s650.glb",
+        audioPath: "assets/Ford/audio/audio.mp3",
+        cam_orbit: "30deg 75deg 5m",
+        color_theme: "#C0C0C0", // Silver
+        image: "assets/thumbnails/shelby.png"
+    },
+    {
+        brand: "BIKINI BOTTOM MOTORS",
+        model: "Krabby Patty Wagon 2.0",
+        sub_model: "Secret Formula Edition",
+        price: "One Krabby Patty",
+        rating: 6,
+        mods: ["Sesame Seed Finish", "Pickle Wheels", "Extra Cheese Interior", "Spatula Spoiler"],
+        stats: {
+            hp: 10000,
+            torque: 5000,
+            zeroSixty: 0.1,
+            handling: 100
+        },
+        tech: {
+            engine: "Deep Fryer V12",
+            trans: "Fry Grease Auto"
+        },
+        file_path: "assets/Krusty Krabs/spongebobs_krabby_patty_wagon.glb",
+        audioPath: "assets/Krusty Krabs/audio/audio.mp3",
+        cam_orbit: "0deg 80deg 2.5m",
+        color_theme: "#ff9900", // Burger color
+        image: "assets/thumbnails/krabby.png"
     }
 ];
 
@@ -124,7 +217,11 @@ const paintMaterials = {
         "rNissan_SkylineGTR34F2_1999Coloured_Material1"
     ],
     "PORSCHE": ["Porsche_911GT3TouringRewardRecycled_2022Paint_Material"],
-    "TOYOTA": ["tToyota_GRSupraTNR6_2020PaintTNR_Material1"]
+    "TOYOTA": ["tToyota_GRSupraTNR6_2020PaintTNR_Material1"],
+    "CHEVROLET": ["cChevrolet_CorvetteC8ZR1_2024Paint_Material1"],
+    "LAMBORGHINI": ["Huracan_EVO_Paint"],
+    "SHELBY": ["SSSShelby_SuperSnakeS650RewardRecycled_2024Paint_Material1"],
+    "BIKINI BOTTOM MOTORS": [] // No paint changing allowed
 };
 
 // Colors to pick from - OEM LEGENDS
@@ -255,7 +352,7 @@ function renderMenu() {
         card.className = 'brand-card';
         card.innerHTML = `
             <img src="${car.image}" alt="${car.brand} ${car.model}">
-            <div class="brand-name">${car.brand}</div>
+            <div class="brand-name" style="color: ${car.color_theme}">${car.brand}</div>
             <div class="brand-model">${car.model}</div>
         `;
         card.addEventListener('click', () => loadCar(index));
@@ -399,17 +496,38 @@ function updateMobileView(car) {
     // 1. Mobile Specs (Left Panel Equivalent)
     let modsHtml = car.mods.map(mod => `<li>${mod}</li>`).join('');
 
+    // 0. Render Mobile Color Picker (if applicable)
+    let colorPickerHtml = '';
+    const validBrand = Object.keys(paintMaterials).find(k => k.toUpperCase() === car.brand.toUpperCase());
+
+    if (validBrand && paintMaterials[validBrand].length > 0) {
+        // Generate buttons
+        const buttons = paintColors.map(color => `
+            <div class="color-btn" style="background-color: ${color.hex}" 
+                 onclick="applyPaint('${color.hex}', '${validBrand}')"></div>
+        `).join('');
+
+        colorPickerHtml = `
+            <div class="mob-section">
+                <h3>MAGIC PAINT</h3>
+                <div class="mobile-colors">
+                    ${buttons}
+                </div>
+            </div>
+        `;
+    }
+
     mobSpecs.innerHTML = `
         <div class="mob-header">
-            <div class="mob-brand">${car.brand}</div>
+            <div class="mob-brand" style="color: ${car.color_theme}">${car.brand}</div>
             <h1 class="mob-model">${car.model}</h1>
             <div class="mob-price">${car.price}</div>
         </div>
+        ${colorPickerHtml}
         <div class="mob-section">
             <h3>MODIFICATIONS</h3>
             <ul id="mod-list">${modsHtml}</ul>
         </div>
-        <!-- Note: Color Picker is Desktop Left Panel only for now, unless we clone it here -->
     `;
 
     // 2. Mobile Stats (Right Panel Equivalent + Delivery Button)
@@ -461,7 +579,7 @@ function renderColorPicker(brand) {
     // Check if we have materials for this brand
     const validBrand = Object.keys(paintMaterials).find(k => k.toUpperCase() === brand.toUpperCase());
 
-    if (!validBrand) {
+    if (!validBrand || paintMaterials[validBrand].length === 0) {
         colorPickerContainer.innerHTML = '<span style="color:var(--text-grey); font-size:0.8rem;">Factory Paint Only</span>';
         return;
     }
@@ -506,20 +624,32 @@ function animateStats(stats) {
     const MAX_HP = 800;
     const MAX_TQ = 700;
 
-    // HP
-    const hpPct = (stats.hp / MAX_HP) * 100;
-    valHP.innerText = stats.hp + " HP";
-    barHP.style.width = `${Math.min(hpPct, 100)}%`;
+    // HP - Handle Krabby Patty "Snail Power" case
+    // If stats.hp > 2000, assume it's the joke car or hypercar
+    if (stats.hp > 2000) {
+        valHP.innerText = "10,000 Snail Power";
+        barHP.style.width = '100%'; // Max out bar
+    } else {
+        const hpPct = (stats.hp / MAX_HP) * 100;
+        valHP.innerText = stats.hp + " HP";
+        barHP.style.width = `${Math.min(hpPct, 100)}%`;
+    }
 
     // Torque
     const tqPct = (stats.torque / MAX_TQ) * 100;
     valTQ.innerText = stats.torque + " LB-FT";
     barTQ.style.width = `${Math.min(tqPct, 100)}%`;
 
-    // 0-60 (Inverse) - 2.0s is amazing (100%), 5.0s is slow (0%)
-    const quicknessPct = Math.max(0, (5 - stats.zeroSixty) / 3 * 100);
-    val060.innerText = stats.zeroSixty + "s";
-    bar060.style.width = `${Math.min(quicknessPct, 100)}%`;
+    // 0-60 (Inverse) 
+    // Handle super fast meme stats
+    if (stats.zeroSixty < 1.0) {
+        val060.innerText = "Faster than Hasselhoff";
+        bar060.style.width = '100%';
+    } else {
+        const quicknessPct = Math.max(0, (5 - stats.zeroSixty) / 3 * 100);
+        val060.innerText = stats.zeroSixty + "s";
+        bar060.style.width = `${Math.min(quicknessPct, 100)}%`;
+    }
 
     // Handling
     valHandle.innerText = stats.handling + "/100";
@@ -555,10 +685,12 @@ function toggleEnvironment() {
         modelViewer.setAttribute('skybox-image', 'assets/sunset_road.hdr');
         modelViewer.setAttribute('environment-image', 'assets/sunset_road.hdr');
         envBtn.classList.add('active');
+        document.body.classList.add('light-mode');
     } else {
         modelViewer.removeAttribute('skybox-image');
         modelViewer.setAttribute('environment-image', 'neutral');
         envBtn.classList.remove('active');
+        document.body.classList.remove('light-mode');
     }
 }
 
