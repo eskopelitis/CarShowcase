@@ -741,11 +741,19 @@ function updateFullscreenUI() {
         fsInfoBrand.innerText = car.brand;
         fsInfoModel.innerText = car.model;
         stage.style.backgroundColor = '#000';
+
+        // Hide Mobile UI
+        document.querySelector('.mobile-tabs').classList.add('hidden');
+        document.getElementById('mobile-view-container').classList.add('hidden');
     } else {
         fsBtn.classList.remove('active');
         iconExpand.classList.remove('hidden');
         iconCompress.classList.add('hidden');
         stage.style.backgroundColor = 'transparent';
+
+        // Show Mobile UI
+        document.querySelector('.mobile-tabs').classList.remove('hidden');
+        document.getElementById('mobile-view-container').classList.remove('hidden');
     }
 }
 

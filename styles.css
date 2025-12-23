@@ -20,9 +20,11 @@
 }
 
 body.light-mode {
-    --bg-panel: rgba(240, 240, 255, 0.65);
-    --bg-panel-hover: rgba(255, 255, 255, 0.8);
-    --border-color: rgba(0, 0, 0, 0.1);
+    --bg-panel: rgba(255, 255, 255, 0.05);
+    /* Almost invisible */
+    --bg-panel-hover: rgba(255, 255, 255, 0.2);
+    --border-color: transparent;
+    /* No borders */
     --text-white: #222222;
     --text-grey: #444444;
 }
@@ -232,11 +234,13 @@ html {
 }
 
 /* --- SHOWROOM (3-Column Grid) --- */
+/* --- SHOWROOM (Overlay Layout) --- */
 #showroom-screen {
-    display: grid;
-    grid-template-columns: 25% 1fr 25%;
-    grid-template-rows: 100%;
+    position: relative;
+    width: 100%;
+    height: 100%;
     background: #000;
+    overflow: hidden;
 }
 
 .showroom-bg {
@@ -288,7 +292,13 @@ html {
 
 
 /* PANELS */
+/* PANELS */
 aside {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25%;
+    height: 100%;
     padding: 3rem 2rem;
     display: flex;
     flex-direction: column;
@@ -299,10 +309,11 @@ aside {
     z-index: 20;
     overflow-y: auto;
     transition: background 0.3s ease, border-color 0.3s ease;
-    /* Allow scrolling content */
 }
 
 .panel-right {
+    left: auto;
+    right: 0;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     background: var(--bg-panel);
@@ -392,9 +403,13 @@ aside {
 
 /* CENTER STAGE */
 .stage-center {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    z-index: 1;
+    /* Behind Panels */
 }
 
 model-viewer {
@@ -515,7 +530,8 @@ model-viewer {
 .fs-btn {
     position: absolute;
     top: 2rem;
-    right: 2rem;
+    right: 27%;
+    /* Positioned to left of Right Panel (25%) */
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -620,12 +636,15 @@ model-viewer {
     }
 
     /* FULLSCREEN MOBILE OPTIMIZATIONS */
+    /* FULLSCREEN MOBILE OPTIMIZATIONS */
     .fs-btn {
-        top: 1rem;
-        right: 1rem;
+        position: fixed;
+        top: max(20px, env(safe-area-inset-top));
+        right: 20px;
         width: 44px;
         height: 44px;
         opacity: 0.8;
+        z-index: 999;
     }
 
     .fullscreen-info {
@@ -678,23 +697,29 @@ model-viewer {
     }
 
     .stage-center {
-        order: 1;
-        height: 40vh;
-        /* Fixed height for viewer */
-        flex-shrink: 0;
-        position: relative;
-        z-index: 50;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+        /* Behind UI */
     }
 
     /* MOBILE TABS */
+    /* MOBILE TABS - Transparent */
     .mobile-tabs {
         order: 2;
         display: flex;
         width: 100%;
-        background: #000;
-        border-bottom: 1px solid var(--border-color);
+        background: transparent !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         z-index: 60;
         flex-shrink: 0;
+        padding-top: 40vh;
+        /* Push down below viewer initial area */
+        position: relative;
+        pointer-events: auto;
     }
 
     .tab-btn {
@@ -719,12 +744,20 @@ model-viewer {
     }
 
     /* MOBILE VIEW CONTAINER */
+    /* MOBILE VIEW CONTAINER - Transparent with Gradient */
     #mobile-view-container {
         order: 3;
         flex-grow: 1;
         overflow-y: auto;
-        padding-bottom: 80px;
-        background: #000;
+        padding-bottom: 100px;
+        /* Safe area for scrolling */
+        background: transparent !important;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+        z-index: 10;
+        position: relative;
+        pointer-events: auto;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        /* Standard Dark Mode Shadow */
     }
 
     .tab-content {
@@ -807,6 +840,31 @@ model-viewer {
         font-weight: 700;
         margin-top: 2px;
         display: block;
+    }
+
+    /* MOBILE LIGHT MODE OVERRIDES */
+    body.light-mode #mobile-view-container {
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+        color: #111;
+    }
+
+    body.light-mode .mob-model,
+    body.light-mode .mob-brand,
+    body.light-mode .mob-stat-val {
+        color: #111 !important;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    body.light-mode .mob-price,
+    body.light-mode .mob-section h3,
+    body.light-mode .mob-stat-row label {
+        color: #222 !important;
+        font-weight: 600;
+    }
+
+    body.light-mode .mob-section,
+    body.light-mode .mobile-tabs {
+        border-color: transparent !important;
     }
 }
 
