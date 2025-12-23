@@ -636,7 +636,6 @@ model-viewer {
     }
 
     /* FULLSCREEN MOBILE OPTIMIZATIONS */
-    /* FULLSCREEN MOBILE OPTIMIZATIONS */
     .fs-btn {
         position: fixed;
         top: max(20px, env(safe-area-inset-top));
@@ -699,68 +698,25 @@ model-viewer {
         max-width: 350px;
     }
 
-    /* SHOWROOM - Vertical Stack with Tabs */
+    /* SHOWROOM - Vertical Layout (Fixed Split) */
     #showroom-screen {
-        grid-template-columns: 1fr;
-        grid-template-rows: 40vh auto 1fr;
-        /* Viewer | Tabs | Content */
-        overflow: hidden;
-        /* No global scroll */
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .stage-center {
-        position: relative;
-        /* Not fixed on mobile split */
-        width: 100%;
-        height: 45vh;
-        /* Top 45% */
-        z-index: 1;
-        order: 1;
-    }
-
-    /* MOBILE TABS */
-    .mobile-tabs {
-        order: 2;
-        display: flex;
-        width: 100%;
-        height: 50px;
-        /* Fixed tab height */
-        background: rgba(0, 0, 0, 0.8);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        z-index: 60;
-        flex-shrink: 0;
-        position: relative;
-        padding-top: 0;
-        /* Remove padding */
-        pointer-events: auto;
-    }
-
-    /* MOBILE VIEW CONTAINER */
-    #mobile-view-container {
-        order: 3;
-        flex-grow: 1;
-        height: calc(55vh - 50px);
-        /* Bottom 55% minus tabs */
-        overflow-y: auto;
-        padding-bottom: 100px;
-        background: #000;
-        /* Default Dark */
-        z-index: 10;
-        position: relative;
-        pointer-events: auto;
-    }
-
-    .tab-content {
-        display: none;
-        padding: 1.5rem;
-        animation: fadeIn 0.3s ease-out;
-    }
-
-    .tab-content.active {
         display: block;
+        position: relative;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    /* 1. THE CAR (Top 55%) */
+    .stage-center {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 55vh;
+        z-index: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     /* Hide Desktop Panels on Mobile */
@@ -769,7 +725,75 @@ model-viewer {
         display: none !important;
     }
 
-    /* Styles for Injected Mobile Content */
+    /* 2. THE TABS (Floating Segmented Control) */
+    .mobile-tabs {
+        position: absolute;
+        bottom: 45vh;
+        /* Sit right on top of the Info Panel */
+        left: 0;
+        width: 100%;
+        height: 50px;
+        z-index: 50;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        background: transparent;
+        /* Remove solid background */
+        border: none;
+        pointer-events: none;
+        /* Let clicks pass through container */
+    }
+
+    .tab-btn {
+        pointer-events: auto;
+        background: transparent;
+        border: none;
+        color: var(--text-grey);
+        font-family: var(--font-main);
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Active State (Default Dark) */
+    .tab-btn.active {
+        background: rgba(255, 255, 255, 0.1);
+        /* Light pill */
+        color: #fff;
+        border-radius: 20px;
+        font-weight: 700;
+    }
+
+    /* 3. THE INFO PANEL (Bottom 45%) */
+    #mobile-view-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 45vh;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: #000;
+        /* Default Dark */
+        z-index: 20;
+    }
+
+    .tab-content {
+        display: none;
+        padding-bottom: 2rem;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Mobile Content Styles */
     .mob-header {
         margin-bottom: 1.5rem;
     }
@@ -835,44 +859,45 @@ model-viewer {
         display: block;
     }
 
-    /* MOBILE LIGHT MODE OVERRIDES */
+    /* --- MOBILE LIGHT MODE FIX --- */
     body.light-mode #mobile-view-container {
-        text-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
-        color: #111;
-    }
-
-    body.light-mode .mob-model,
-    body.light-mode .mob-brand,
-    body.light-mode .mob-stat-val {
-        color: #111 !important;
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    }
-
-    /* MOBILE LIGHT MODE OVERRIDES */
-    body.light-mode #mobile-view-container {
-        background: rgba(255, 255, 255, 0.15) !important;
+        background: rgba(255, 255, 255, 0.85) !important;
+        /* Transparent White Glass */
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
-        text-shadow: none;
         color: #111;
     }
 
+    /* Force Text Dark in Light Mode */
     body.light-mode .mob-model,
     body.light-mode .mob-brand,
-    body.light-mode .mob-stat-val {
-        color: #000 !important;
-        text-shadow: none;
-    }
-
+    body.light-mode .mob-stat-val,
     body.light-mode .mob-price,
     body.light-mode .mob-section h3,
     body.light-mode .mob-stat-row label {
         color: #222 !important;
-        font-weight: 600;
+        text-shadow: none;
     }
 
     body.light-mode .mob-section {
         border-color: rgba(0, 0, 0, 0.1) !important;
+    }
+
+    body.light-mode .mob-bar-bg {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Tab Redesign for Light Mode */
+    body.light-mode .tab-btn {
+        color: #444;
+    }
+
+    body.light-mode .tab-btn.active {
+        background: rgba(0, 0, 0, 0.1);
+        /* Light Grey Pill */
+        color: #000;
+        border-radius: 20px;
+        font-weight: 700;
     }
 }
 
