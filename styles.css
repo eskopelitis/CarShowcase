@@ -647,6 +647,21 @@ model-viewer {
         z-index: 999;
     }
 
+    /* Fullscreen Mode - Overrides */
+    body.is-fullscreen .mobile-tabs,
+    body.is-fullscreen #mobile-view-container,
+    body.is-fullscreen .main-header {
+        display: none !important;
+    }
+
+    body.is-fullscreen .stage-center {
+        height: 100vh !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+    }
+
     .fullscreen-info {
         bottom: 1.5rem;
         left: 1.5rem;
@@ -697,67 +712,45 @@ model-viewer {
     }
 
     .stage-center {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
+        position: relative;
+        /* Not fixed on mobile split */
+        width: 100%;
+        height: 45vh;
+        /* Top 45% */
         z-index: 1;
-        /* Behind UI */
+        order: 1;
     }
 
     /* MOBILE TABS */
-    /* MOBILE TABS - Transparent */
     .mobile-tabs {
         order: 2;
         display: flex;
         width: 100%;
-        background: transparent !important;
+        height: 50px;
+        /* Fixed tab height */
+        background: rgba(0, 0, 0, 0.8);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         z-index: 60;
         flex-shrink: 0;
-        padding-top: 40vh;
-        /* Push down below viewer initial area */
         position: relative;
+        padding-top: 0;
+        /* Remove padding */
         pointer-events: auto;
-    }
-
-    .tab-btn {
-        flex: 1;
-        background: transparent;
-        color: var(--text-grey);
-        border: none;
-        padding: 1rem;
-        font-family: 'Rajdhani', sans-serif;
-        font-weight: 700;
-        font-size: 1rem;
-        letter-spacing: 2px;
-        cursor: pointer;
-        transition: all 0.3s;
-        border-bottom: 2px solid transparent;
-    }
-
-    .tab-btn.active {
-        color: #fff;
-        background: rgba(255, 255, 255, 0.05);
-        border-bottom-color: var(--accent-active);
     }
 
     /* MOBILE VIEW CONTAINER */
-    /* MOBILE VIEW CONTAINER - Transparent with Gradient */
     #mobile-view-container {
         order: 3;
         flex-grow: 1;
+        height: calc(55vh - 50px);
+        /* Bottom 55% minus tabs */
         overflow-y: auto;
         padding-bottom: 100px;
-        /* Safe area for scrolling */
-        background: transparent !important;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+        background: #000;
+        /* Default Dark */
         z-index: 10;
         position: relative;
         pointer-events: auto;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-        /* Standard Dark Mode Shadow */
     }
 
     .tab-content {
@@ -855,6 +848,22 @@ model-viewer {
         text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
     }
 
+    /* MOBILE LIGHT MODE OVERRIDES */
+    body.light-mode #mobile-view-container {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        text-shadow: none;
+        color: #111;
+    }
+
+    body.light-mode .mob-model,
+    body.light-mode .mob-brand,
+    body.light-mode .mob-stat-val {
+        color: #000 !important;
+        text-shadow: none;
+    }
+
     body.light-mode .mob-price,
     body.light-mode .mob-section h3,
     body.light-mode .mob-stat-row label {
@@ -862,9 +871,8 @@ model-viewer {
         font-weight: 600;
     }
 
-    body.light-mode .mob-section,
-    body.light-mode .mobile-tabs {
-        border-color: transparent !important;
+    body.light-mode .mob-section {
+        border-color: rgba(0, 0, 0, 0.1) !important;
     }
 }
 

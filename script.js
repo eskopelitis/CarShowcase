@@ -137,6 +137,30 @@ const DATA_CARS = [
         image: "assets/thumbnails/chevrolet.png"
     },
     {
+        brand: "CHEVROLET",
+        model: "Corvette ZR1 ZTK (C8)",
+        sub_model: "2025",
+        price: "$190,000+ (Est)",
+        rating: 5,
+        mods: ["ZTK Track Pkg", "Carbon Aero", "Michelin Pilot Sport Cup 2R"],
+        stats: {
+            hp: 1064,
+            torque: 828,
+            zeroSixty: 2.5,
+            handling: 92
+        },
+        tech: {
+            engine: "LT7 5.5L Twin-Turbo V8",
+            trans: "8-Speed DCT"
+        },
+        file_path: "assets/Chevrolet/2025_chevrolet_corvette_zr1_ztk_track_c8.glb",
+        audioPath: "assets/Chevrolet/audio/audio.mp3",
+        cam_orbit: "45deg 75deg 5m",
+        color_theme: "#ffe600",
+        image: "assets/thumbnails/chevrolet.png",
+        paint_materials: ["cChevrolet_CorvetteC8ZR1_2024Paint_Material1"]
+    },
+    {
         brand: "LAMBORGHINI",
         model: "Huracán EVO",
         sub_model: "LP 640-4",
@@ -155,9 +179,10 @@ const DATA_CARS = [
         },
         file_path: "assets/Lamborghini/2019_lamborghini_huracan_evo.glb",
         audioPath: "assets/Lamborghini/audio/audio.mp3",
-        cam_orbit: "-35deg 82deg 6.5m",
-        color_theme: "#45ff00", // Green
-        image: "assets/thumbnails/lamborghini.png"
+        cam_orbit: "-35deg 80deg 6.5m",
+        color_theme: "#45ff00",
+        image: "assets/thumbnails/lamborghini.png",
+        paint_materials: ["Huracan_EVO_Paint"]
     },
     {
         brand: "SHELBY",
@@ -173,17 +198,18 @@ const DATA_CARS = [
             handling: 88
         },
         tech: {
-            engine: "5.0L Supercharged Coyote V8",
+            engine: "830+ HP Supercharged V8",
             trans: "Manual/Auto"
         },
         file_path: "assets/Ford/2024_ford_shelby_super_snake_s650.glb",
         audioPath: "assets/Ford/audio/audio.mp3",
         cam_orbit: "30deg 75deg 5m",
-        color_theme: "#C0C0C0", // Silver
-        image: "assets/thumbnails/shelby.png"
+        color_theme: "#C0C0C0",
+        image: "assets/thumbnails/shelby.png",
+        paint_materials: ["SSSShelby_SuperSnakes650RewardRecycled_2024Paint_Material1"]
     },
     {
-        brand: "BIKINI BOTTOM MOTORS",
+        brand: "BIKINI BOTTOM",
         model: "Krabby Patty Wagon 2.0",
         sub_model: "Secret Formula Edition",
         price: "One Krabby Patty",
@@ -201,9 +227,10 @@ const DATA_CARS = [
         },
         file_path: "assets/Krusty Krabs/spongebobs_krabby_patty_wagon.glb",
         audioPath: "assets/Krusty Krabs/audio/audio.mp3",
-        cam_orbit: "0deg 80deg 2.5m",
-        color_theme: "#ff9900", // Burger color
-        image: "assets/thumbnails/krabby.png"
+        cam_orbit: "0deg 80deg 3m",
+        color_theme: "#ff9900",
+        image: "assets/thumbnails/krabby.png",
+        paint_materials: []
     }
 ];
 
@@ -443,6 +470,9 @@ function loadCar(index) {
     currentCarIndex = index;
     const car = DATA_CARS[index];
 
+    // Store car ref on viewer for paint logic
+    modelViewer.currentCar = car;
+
     // Show Loader
     const loader = document.getElementById('loader');
     loader.classList.add('active');
@@ -575,11 +605,16 @@ function updateMobileView(car) {
 
 function renderColorPicker(brand) {
     colorPickerContainer.innerHTML = '';
+    const car = DATA_CARS[currentCarIndex];
 
-    // Check if we have materials for this brand
-    const validBrand = Object.keys(paintMaterials).find(k => k.toUpperCase() === brand.toUpperCase());
+    // Priority: Per-car materials -> Brand Materials -> Empty
+    let targetMats = car.paint_materials;
 
-    if (!validBrand || paintMaterials[validBrand].length === 0) {
+    if (!targetMats && paintMaterials[brand]) {
+        targetMats = paintMaterials[brand];
+    }
+
+    if (!targetMats || targetMats.length === 0) {
         colorPickerContainer.innerHTML = '<span style="color:var(--text-grey); font-size:0.8rem;">Factory Paint Only</span>';
         return;
     }
@@ -594,7 +629,7 @@ function renderColorPicker(brand) {
             // Remove active from others
             document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            applyPaint(color.hex, validBrand);
+            applyPaint(color.hex, brand);
         };
         colorPickerContainer.appendChild(btn);
     });
@@ -610,7 +645,11 @@ function applyPaint(hexColor, brandKey) {
     const baseColorFactor = [r, g, b, 1.0];
 
     // Get Target Material Names
-    const targetMats = paintMaterials[brandKey];
+    let targetMats = modelViewer.currentCar.paint_materials;
+    if (!targetMats && paintMaterials[brandKey]) {
+        targetMats = paintMaterials[brandKey];
+    }
+    if (!targetMats) return;
 
     modelViewer.model.materials.forEach(mat => {
         if (targetMats.includes(mat.name)) {
