@@ -113,29 +113,7 @@ const DATA_CARS = [
         image: "assets/thumbnails/toyota.png"
     },
     // --- NEW CARS ---
-    {
-        brand: "CHEVROLET",
-        model: "Corvette ZR1 ZTK (C8)",
-        sub_model: "2025 Prototype",
-        price: "$190,000+ (Est.)",
-        rating: 5,
-        mods: ["ZTK Track Performance Pkg", "Carbon Fiber Wheels", "High-Downforce Aero"],
-        stats: {
-            hp: 1064,
-            torque: 850,
-            zeroSixty: 2.5,
-            handling: 95
-        },
-        tech: {
-            engine: "LT7 5.5L Twin-Turbo V8",
-            trans: "8-Speed DCT"
-        },
-        file_path: "assets/Chevrolet/2025_chevrolet_corvette_zr1_ztk_track_c8.glb",
-        audioPath: "assets/Chevrolet/audio/audio.mp3",
-        cam_orbit: "45deg 75deg 5m",
-        color_theme: "#ffe600", // Yellow
-        image: "assets/thumbnails/chevrolet.png"
-    },
+
     {
         brand: "CHEVROLET",
         model: "Corvette ZR1 ZTK (C8)",
@@ -231,13 +209,225 @@ const DATA_CARS = [
         color_theme: "#ff9900",
         image: "assets/thumbnails/krabby.png",
         paint_materials: []
+    },
+    // --- 1. NISSAN GT-R R35 ---
+    {
+        brand: "NISSAN",
+        model: "GT-R R35",
+        sub_model: "2017",
+        price: "$120,000+",
+        rating: 5,
+        mods: ["Nismo Aero Pkg", "Titanium Exhaust", "Rays Engineering Wheels"],
+        stats: { hp: 565, torque: 467, zeroSixty: 2.9, handling: 90 },
+        tech: { engine: "3.8L TT V6", trans: "6-Speed Dual Clutch" },
+        file_path: "assets/Nissan/nissan_skyline_gtr_r35.glb",
+        audioPath: "assets/Nissan/audio/audio.mp3",
+        cam_orbit: "45deg 75deg 5m",
+        color_theme: "#2E1A47",
+        image: "assets/thumbnails/nissan_r35.png",
+        paint_materials: ["r35_paint"]
+    },
+    // --- 2. CAMARO EXORCIST ---
+    {
+        brand: "CHEVROLET",
+        model: "Camaro Exorcist ZL1",
+        sub_model: "The Exorcist",
+        price: "$135,000",
+        rating: 5,
+        mods: ["High-Flow Supercharger", "Hennessey Calibration", "Drag Radials"],
+        stats: { hp: 1000, torque: 883, zeroSixty: 2.1, handling: 85 },
+        tech: { engine: "6.2L Supercharged V8", trans: "10-Speed Auto" },
+        file_path: "assets/Chevrolet/2018_hennessey_the_exorcist_camaro_zl1.glb",
+        audioPath: "assets/Chevrolet/audio/audio.mp3",
+        cam_orbit: "35deg 80deg 5m",
+        color_theme: "#FF2400",
+        image: "assets/thumbnails/camaro_exorcist.png",
+        paint_materials: ["Hennessey_CamaroExorcistRewardRecycled_2017Paint_Material"]
+    },
+    // --- 3. LEXUS LFA ---
+    {
+        brand: "LEXUS",
+        model: "LFA",
+        sub_model: "Nurburgring Pkg",
+        price: "$375,000 (Orig)",
+        rating: 5,
+        mods: ["Carbon Monocoque", "Titanium Valves", "BBS Forged Wheels"],
+        stats: { hp: 552, torque: 354, zeroSixty: 3.6, handling: 95 },
+        tech: { engine: "4.8L V10", trans: "6-Speed ASG" },
+        file_path: "assets/Lexus/2011_lexus_lfa.glb",
+        audioPath: "assets/Lexus/audio/audio.mp3",
+        cam_orbit: "40deg 75deg 5m",
+        color_theme: "#ffffff",
+        image: "assets/thumbnails/Lexus LFA.png",
+        paint_materials: ["Lexus_LFAGold_2011Paint_Material"]
+    },
+    // --- 4. BMW M3 TOURING (G81) ---
+    {
+        brand: "BMW",
+        model: "M3 Touring (G81)",
+        sub_model: "Competition xDrive",
+        price: "€100,000+",
+        rating: 5,
+        mods: ["M-Performance Parts", "Carbon Buckets", "Eventuri Intake"],
+        stats: { hp: 503, torque: 479, zeroSixty: 3.6, handling: 92 },
+        tech: { engine: "3.0L TT Inline-6", trans: "8-Speed M Steptronic" },
+        file_path: "assets/BMW/2023_bmw_m3_g81_touring.glb",
+        audioPath: "assets/BMW/audio/audio.mp3",
+        cam_orbit: "-45deg 80deg 5.5m",
+        color_theme: "#004225",
+        image: "assets/thumbnails/BMW M3 Touring (G81).png",
+
+        paint_materials: ["Paint", "Material.001"]
+    },
+    // --- 5. BMW M3 (E92) ---
+    {
+        brand: "BMW",
+        model: "M3 Coupe (E92)",
+        sub_model: "Competition",
+        price: "$60,000 (Orig)",
+        rating: 5,
+        mods: ["Competition Pkg", "Carbon Roof", "Akrapovic Exhaust"],
+        stats: { hp: 414, torque: 295, zeroSixty: 4.5, handling: 90 },
+        tech: { engine: "4.0L NA V8 (S65)", trans: "7-Speed DCT" },
+        file_path: "assets/BMW/2010_bmw_m3_e92.glb",
+        audioPath: "assets/BMW/audio/audio.mp3",
+        cam_orbit: "45deg 75deg 5m",
+        color_theme: "#ff9900",
+        image: "assets/thumbnails/BMW M3 Coupe (E92).png",
+
+        paint_materials: ["BMWM_CarPaint_Max1"]
+    },
+    // --- 6. BMW M5 TOURING (G99) ---
+    {
+        brand: "BMW",
+        model: "M5 Touring (G99)",
+        sub_model: "2025 Hybrid",
+        price: "$140,000+ (Est)",
+        rating: 5,
+        mods: ["M Hybrid System", "Carbon Ceramic Brakes", "M Performance Aero"],
+        stats: { hp: 717, torque: 738, zeroSixty: 3.4, handling: 88 },
+        tech: { engine: "4.4L V8 Hybrid", trans: "8-Speed M Steptronic" },
+        file_path: "assets/BMW/2025_bmw_m5_g99_touring.glb",
+        audioPath: "assets/BMW/audio/audio.mp3",
+        cam_orbit: "-30deg 80deg 6m",
+        color_theme: "#00f0ff",
+        image: "assets/thumbnails/BMW M5 Touring (G99).png",
+
+        paint_materials: ["bBMW_M5G99Touring_2024Paint_Material"]
+    },
+    // --- 7. BMW X3 M (G01) ---
+    {
+        brand: "BMW",
+        model: "X3 M Competition",
+        sub_model: "G01",
+        price: "$70,000+",
+        rating: 4,
+        mods: ["Competition Pkg", "21-inch M Wheels", "Sport Exhaust"],
+        stats: { hp: 503, torque: 442, zeroSixty: 3.3, handling: 85 },
+        tech: { engine: "3.0L TT Inline-6", trans: "8-Speed M Steptronic" },
+        file_path: "assets/BMW/2018_bmw_x3_g01_model_m.glb",
+        audioPath: "assets/BMW/audio/audio.mp3",
+        cam_orbit: "45deg 80deg 6m",
+        color_theme: "#ff3b3b",
+        image: "assets/thumbnails/BMW X3 M (G01).png",
+
+        paint_materials: ["CarPaint"]
+    },
+    // --- 8. BMW M2 (G87) ---
+    {
+        brand: "BMW",
+        model: "M2 M-Performance",
+        sub_model: "G87",
+        price: "$63,000+",
+        rating: 5,
+        mods: ["M-Performance Wing", "Center Exhaust", "Carbon Inlets"],
+        stats: { hp: 453, torque: 406, zeroSixty: 3.9, handling: 92 },
+        tech: { engine: "3.0L TT Inline-6", trans: "6-Speed Manual" },
+        file_path: "assets/BMW/2023_bmw_m2_m-performance_parts_g87.glb",
+        audioPath: "assets/BMW/audio/audio.mp3",
+        cam_orbit: "45deg 75deg 5m",
+        color_theme: "#00f0ff",
+        image: "assets/thumbnails/BMW M2 (G87).png",
+
+        paint_materials: ["m2BMW_M2G87MPerformance_2023Paint_Material"]
+    },
+    // --- 9. FORD GT ---
+    {
+        brand: "FORD",
+        model: "GT",
+        sub_model: "2017",
+        price: "$450,000+",
+        rating: 5,
+        mods: ["Carbon Monocoque", "Active Aero", "Gorilla Glass Windshield"],
+        stats: { hp: 647, torque: 550, zeroSixty: 3.0, handling: 98 },
+        tech: { engine: "3.5L TT V6 EcoBoost", trans: "7-Speed DCT" },
+        file_path: "assets/Ford/2017_ford_gt.glb",
+        audioPath: "assets/Ford/audio/audio.mp3",
+        cam_orbit: "30deg 70deg 5m",
+        color_theme: "#00f0ff",
+        image: "assets/thumbnails/Ford GT (2017).png",
+
+        paint_materials: ["Ford_GTRewardRecycled66_2017Paint_Material"]
+    },
+    // --- 10. MUSTANG GT ---
+    {
+        brand: "FORD",
+        model: "Mustang GT (S650)",
+        sub_model: "2024",
+        price: "$45,000+",
+        rating: 4,
+        mods: ["Performance Pack", "MagnaRide", "Active Exhaust"],
+        stats: { hp: 480, torque: 415, zeroSixty: 4.3, handling: 85 },
+        tech: { engine: "5.0L Coyote V8", trans: "10-Speed Auto" },
+        file_path: "assets/Ford/2024_ford_mustang_gt.glb",
+        audioPath: "assets/Ford/audio/audio.mp3",
+        cam_orbit: "45deg 75deg 5m",
+        color_theme: "#ff3b3b",
+        image: "assets/thumbnails/Mustang GT (2024).png",
+
+        paint_materials: ["Ford_MustangGT_2024PaintA_Material"]
+    },
+    // --- 11. PORSCHE 911 GT3 RS (SNOW EDITION) ---
+    {
+        brand: "PORSCHE",
+        model: "911 GT3 RS (Snow Ed.)",
+        sub_model: "Weissach",
+        price: "$300,000+",
+        rating: 5,
+        mods: ["Weissach Package", "Snow Camo Livery", "Magnesium Wheels"],
+        stats: { hp: 518, torque: 342, zeroSixty: 3.0, handling: 99 },
+        tech: { engine: "4.0L NA Flat-6", trans: "7-Speed PDK" },
+        file_path: "assets/Porsche/porsche_911_gt3_rs_snow_edition.glb",
+        audioPath: "assets/Porsche/audio/audio.mp3",
+        cam_orbit: "-45deg 80deg 5m",
+        color_theme: "#ffffff",
+        image: "assets/thumbnails/Porsche 911 GT3 RS Snow Edition.png",
+
+        paint_materials: ["lens"]
+    },
+    // --- 12. MAZDA RX-7 FD ---
+    {
+        brand: "MAZDA",
+        model: "RX-7 FD",
+        sub_model: "Spirit R",
+        price: "$60,000+ (JDM)",
+        rating: 5,
+        mods: ["Spirit R Recaros", "Pop-up Headlights", "Bose Acoustic Wave"],
+        stats: { hp: 276, torque: 231, zeroSixty: 4.8, handling: 94 },
+        tech: { engine: "1.3L 13B-REW Rotary", trans: "5-Speed Manual" },
+        file_path: "assets/Mazda/1999_mazda_rx-7_fd.glb",
+        audioPath: "assets/Mazda/audio/audio.mp3",
+        cam_orbit: "45deg 75deg 4.5m",
+        color_theme: "#ff3b3b",
+        image: "assets/thumbnails/1999 Mazda RX-7 FD.png",
+
+        paint_materials: ["Material.002", "Material.006"]
     }
 ];
 
 // MATERIAL MAPPING (EXACT NAMES)
 const paintMaterials = {
     "BMW": ["bBMW_M4Competition", "untitledBMW_M4CompetitionG82TNR3_2021PaintTNR_Material_008"],
-    // Target all 3 potential body materials for the Nissan
     "NISSAN": [
         "rNissan_SkylineGTR34F2_1999Base_Material1",
         "rNissan_SkylineGTR34F2_1999Paint_Material1",
@@ -248,7 +438,19 @@ const paintMaterials = {
     "CHEVROLET": ["cChevrolet_CorvetteC8ZR1_2024Paint_Material1"],
     "LAMBORGHINI": ["Huracan_EVO_Paint"],
     "SHELBY": ["SSSShelby_SuperSnakeS650RewardRecycled_2024Paint_Material1"],
-    "BIKINI BOTTOM MOTORS": [] // No paint changing allowed
+    "BIKINI BOTTOM MOTORS": [],
+    "NissanR35": ["r35_paint"],
+    "Camaro": ["Hennessey_CamaroExorcistRewardRecycled_2017Paint_Material"],
+    "Lexus": ["Lexus_LFAGold_2011Paint_Material"],
+    "BMW_M3_G81": ["Paint", "Material.001"],
+    "BMW_M3_E92": ["BMWM_CarPaint_Max1"],
+    "BMW_M5_G99": ["bBMW_M5G99Touring_2024Paint_Material"],
+    "BMW_X3": ["CarPaint"],
+    "BMW_M2": ["m2BMW_M2G87MPerformance_2023Paint_Material"],
+    "FordGT": ["Ford_GTRewardRecycled66_2017Paint_Material"],
+    "MustangGT": ["Ford_MustangGT_2024PaintA_Material"],
+    "PorscheSnow": ["lens"],
+    "MazdaRX7": ["Material.002", "Material.006"]
 };
 
 // Colors to pick from - OEM LEGENDS
@@ -377,8 +579,12 @@ function renderMenu() {
     DATA_CARS.forEach((car, index) => {
         const card = document.createElement('div');
         card.className = 'brand-card';
+        // Create slug ID: e.g. "lexus-lfa"
+        const cardId = `${car.brand}-${car.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        card.id = cardId;
+
         card.innerHTML = `
-            <img src="${car.image}" alt="${car.brand} ${car.model}">
+            <img src="${car.image}" alt="${car.brand} ${car.model}" style="${car.img_style || ''}">
             <div class="brand-name" style="color: ${car.color_theme}">${car.brand}</div>
             <div class="brand-model">${car.model}</div>
         `;

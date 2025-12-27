@@ -1201,3 +1201,70 @@ model-viewer {
         box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
     }
 }
+
+/* --- FINE TUNING THUMBNAILS (LFA Onwards Only) --- */
+/* Base Scale for the Group - Resetting from USER-BASE-STYLE (150% width + translate) */
+#lexus-lfa img,
+#bmw-m3-touring-g81 img,
+#bmw-m3-coupe-e92 img,
+#bmw-m5-touring-g99 img,
+#bmw-x3-m-competition img,
+#bmw-m2-m-performance img,
+#ford-gt img,
+#ford-mustang-gt-s650 img,
+#porsche-911-gt3-rs-snow-ed img,
+#mazda-rx-7-fd img {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: none;
+    object-fit: cover;
+    transform: scale(1);
+    object-position: center center;
+}
+
+/* Individual Adjustments (Bias towards Front) */
+/* Left-Facing Cars -> Shift View Left to see nose */
+#lexus-lfa img {
+    object-position: 70% center;
+}
+
+#bmw-m3-coupe-e92 img {
+    object-position: 60% center;
+}
+
+#bmw-x3-m-competition img {
+    object-position: 40% center;
+}
+
+#bmw-m2-m-performance img {
+    object-position: 30% center;
+}
+
+#ford-gt img {
+    object-position: 70% center;
+}
+
+#ford-mustang-gt-s650 img {
+    object-position: 60% center;
+}
+
+#mazda-rx-7-fd img {
+    object-position: 70% center;
+}
+
+/* Right-Facing Cars -> Shift View Right to see nose */
+#bmw-m3-touring-g81 img {
+    object-position: 35% center;
+}
+
+#bmw-m5-touring-g99 img {
+    object-position: 30% center;
+}
+
+#porsche-911-gt3-rs-snow-ed img {
+    object-position: 60% center;
+}
