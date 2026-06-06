@@ -1918,7 +1918,8 @@ model-viewer {
    ============================================================ */
 @media (max-width: 768px) {
     .main-tabs {
-        padding: 1rem 4% 0.6rem;
+        /* Push below the notch / Dynamic Island (viewport-fit=cover) */
+        padding: calc(env(safe-area-inset-top) + 1.25rem) 4% 0.6rem;
         flex-wrap: nowrap;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
