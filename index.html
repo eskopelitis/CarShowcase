@@ -50,19 +50,127 @@
                 <h1>CHRISTMAS</h1>
                 <h1 class="sub">SHOWCASE</h1>
             </div>
-            <button id="start-btn" class="gt-btn">ENTER SHOWROOM</button>
+            <div class="intro-actions">
+                <button id="start-btn" class="gt-btn">ENTER SHOWROOM</button>
+                <button id="game-btn" class="gt-btn">ENTER GAME</button>
+                <button id="pingas-intro-btn" class="gt-btn">ENTER PINGAS</button>
+            </div>
         </div>
     </section>
 
-    <!-- STATE 2: MENU -->
+    <!-- STATE 2: MENU (TABBED) -->
     <section id="menu-screen" class="screen hidden">
-        <header class="menu-header">
-            <div class="header-line"></div>
-            <h2>SELECT VEHICLE</h2>
-        </header>
-        <div class="brand-list" id="brand-list">
-            <!-- Brand Cards Injected Here via JS -->
+
+        <!-- Top Tab Navigation -->
+        <nav class="main-tabs" id="main-tabs">
+            <button class="main-tab active" data-tab="garage">GARAGE</button>
+            <button class="main-tab" data-tab="geo">GUESS THE COUNTRY</button>
+            <button class="main-tab" data-tab="pingas">PINGAS</button>
+        </nav>
+
+        <!-- TAB: GARAGE -->
+        <div class="menu-panel active" id="panel-garage">
+            <header class="menu-header">
+                <div class="header-line"></div>
+                <h2>SELECT VEHICLE</h2>
+            </header>
+            <div class="brand-list" id="brand-list">
+                <!-- Brand Cards Injected Here via JS -->
+            </div>
         </div>
+
+        <!-- TAB: GUESS THE COUNTRY -->
+        <div class="menu-panel" id="panel-geo">
+            <div class="geo-game">
+                <div class="geo-header">
+                    <div>
+                        <h2 class="geo-title">GUESS THE COUNTRY</h2>
+                        <p class="geo-sub">A nation lights up on the map — name every one to win.</p>
+                    </div>
+                    <div class="geo-regions" id="geo-regions">
+                        <button class="geo-region active" data-region="World">World</button>
+                        <button class="geo-region" data-region="Europe">Europe</button>
+                        <button class="geo-region" data-region="Asia">Asia</button>
+                        <button class="geo-region" data-region="Africa">Africa</button>
+                        <button class="geo-region" data-region="North America">N. America</button>
+                        <button class="geo-region" data-region="South America">S. America</button>
+                        <button class="geo-region" data-region="Oceania">Oceania</button>
+                    </div>
+                </div>
+
+                <div class="geo-progress">
+                    <div class="geo-progress-track">
+                        <div class="geo-progress-fill" id="geo-prog-fill"></div>
+                    </div>
+                    <span class="geo-progress-label" id="geo-prog-text">0 / 0</span>
+                </div>
+
+                <div class="geo-body">
+                    <div class="geo-map-col">
+                        <div id="geo-map" class="geo-map">
+                            <div class="geo-loading" id="geo-loading">
+                                <div class="spinner"></div>
+                                <span>Loading world map…</span>
+                            </div>
+                        </div>
+                        <div class="geo-map-tools">
+                            <button id="geo-zoom-in" title="Zoom in">+</button>
+                            <button id="geo-zoom-out" title="Zoom out">−</button>
+                            <button id="geo-locate" title="Focus highlighted country">◎</button>
+                            <button id="geo-world" title="View whole map">⊕</button>
+                        </div>
+                    </div>
+
+                    <div class="geo-side">
+                        <div class="geo-stats">
+                            <div class="geo-stat"><span id="geo-score">0</span><label>SCORE</label></div>
+                            <div class="geo-stat"><span id="geo-streak">0</span><label>STREAK</label></div>
+                            <div class="geo-stat"><span id="geo-acc">100%</span><label>ACCURACY</label></div>
+                            <div class="geo-stat"><span id="geo-timer">0:00</span><label>TIME</label></div>
+                        </div>
+
+                        <div class="geo-ask">Which country is highlighted?</div>
+
+                        <div class="geo-input-wrap">
+                            <input id="geo-input" type="text" autocomplete="off" autocorrect="off"
+                                autocapitalize="off" spellcheck="false" placeholder="Type a country name…" disabled>
+                            <ul id="geo-suggest" class="geo-suggest"></ul>
+                        </div>
+
+                        <div class="geo-actions">
+                            <button id="geo-submit" class="geo-btn primary">GUESS</button>
+                            <button id="geo-hint" class="geo-btn">HINT</button>
+                            <button id="geo-skip" class="geo-btn">SKIP</button>
+                        </div>
+
+                        <div id="geo-feedback" class="geo-feedback"></div>
+                        <ul id="geo-hint-list" class="geo-hint-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Win Overlay -->
+                <div id="geo-win" class="geo-win hidden">
+                    <div class="geo-win-card">
+                        <h2>🏆 WORLD CONQUERED</h2>
+                        <p id="geo-win-text"></p>
+                        <button id="geo-restart" class="geo-btn primary">PLAY AGAIN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: PINGAS -->
+        <div class="menu-panel" id="panel-pingas">
+            <div class="pingas-game">
+                <h2 class="pingas-title">P I N G A S</h2>
+                <p class="pingas-sub">Tap the head. You know you want to.</p>
+                <button id="pingas-btn" class="pingas-btn" aria-label="PINGAS">
+                    <img src="pingas_explainer.png" alt="PINGAS" draggable="false">
+                </button>
+                <div class="pingas-counter">PINGAS COUNT: <span id="pingas-count">0</span></div>
+            </div>
+        </div>
+
     </section>
 
     <!-- STATE 3: SHOWROOM (3-Column Layout) -->

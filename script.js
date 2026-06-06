@@ -611,9 +611,14 @@ function setupEventListeners() {
     });
 
     startBtn.addEventListener('click', () => {
-        initAudio();
-        switchScreen('menu');
+        goToTab('garage');
     });
+
+    // Extra intro entry points
+    const gameBtn = document.getElementById('game-btn');
+    const pingasIntroBtn = document.getElementById('pingas-intro-btn');
+    if (gameBtn) gameBtn.addEventListener('click', () => goToTab('geo'));
+    if (pingasIntroBtn) pingasIntroBtn.addEventListener('click', () => goToTab('pingas'));
 
     backBtn.addEventListener('click', () => {
         if (history.state && history.state.view === 'showroom') {
@@ -1224,3 +1229,571 @@ function setupMobileTabs() {
 
 // Init
 init();
+
+/* ============================================================
+   MENU TABS + GEO GAME + PINGAS  (added feature module)
+   ============================================================ */
+
+setupMainTabs();
+setupPingas();
+
+// ---- Tab navigation ----
+function getMenuPanels() {
+    return {
+        garage: document.getElementById('panel-garage'),
+        geo: document.getElementById('panel-geo'),
+        pingas: document.getElementById('panel-pingas')
+    };
+}
+
+function activateMainTab(key) {
+    const tabs = document.querySelectorAll('.main-tab');
+    const panels = getMenuPanels();
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === key));
+    Object.entries(panels).forEach(([k, p]) => {
+        if (p) p.classList.toggle('active', k === key);
+    });
+    if (key === 'geo') initGeoGame();
+}
+
+// Used by intro buttons + tab bar
+function goToTab(key) {
+    initAudio();
+    switchScreen('menu');
+    activateMainTab(key);
+}
+
+function setupMainTabs() {
+    document.querySelectorAll('.main-tab').forEach(tab => {
+        tab.addEventListener('click', () => activateMainTab(tab.dataset.tab));
+    });
+}
+
+// ---- PINGAS ----
+function setupPingas() {
+    const btn = document.getElementById('pingas-btn');
+    const countEl = document.getElementById('pingas-count');
+    if (!btn) return;
+
+    const SRC = 'Pingas%20Sound%20Effect.mp3';
+    // Warm up the file so the first click is snappy
+    const preload = new Audio(SRC);
+    preload.preload = 'auto';
+
+    let count = 0;
+    btn.addEventListener('click', () => {
+        count++;
+        if (countEl) countEl.textContent = count;
+
+        // Fresh element every click so rapid clicks overlap (plays EVERY time)
+        const a = new Audio(SRC);
+        a.volume = 1.0;
+        a.play().catch(() => { });
+
+        btn.classList.remove('pop');
+        void btn.offsetWidth;
+        btn.classList.add('pop');
+        spawnPingasFloat(btn);
+    });
+}
+
+function spawnPingasFloat(btn) {
+    const wrap = btn.parentElement;
+    if (!wrap) return;
+    const f = document.createElement('span');
+    f.className = 'pingas-float';
+    f.textContent = 'PINGAS';
+    f.style.left = (25 + Math.random() * 50) + '%';
+    wrap.appendChild(f);
+    setTimeout(() => f.remove(), 1100);
+}
+
+/* ============================================================
+   GEO GAME — Guess the Country (D3 + world-atlas TopoJSON)
+   ============================================================ */
+
+const GEO_W = 960, GEO_H = 500;
+
+// Territories / non-sovereign entries excluded from the quiz pool
+const GEO_EXCLUDE = new Set([
+    "Antarctica", "Fr. S. Antarctic Lands", "Greenland", "New Caledonia",
+    "Puerto Rico", "Falkland Is.", "W. Sahara", "N. Cyprus", "Somaliland"
+]);
+
+// continent of every Natural Earth name (for region filter + hints)
+const GEO_CONTINENT = {
+    "Afghanistan": "Asia", "Albania": "Europe", "Algeria": "Africa", "Angola": "Africa",
+    "Antarctica": "Antarctica", "Argentina": "South America", "Armenia": "Asia",
+    "Australia": "Oceania", "Austria": "Europe", "Azerbaijan": "Asia", "Bahamas": "North America",
+    "Bangladesh": "Asia", "Belarus": "Europe", "Belgium": "Europe", "Belize": "North America",
+    "Benin": "Africa", "Bhutan": "Asia", "Bolivia": "South America", "Bosnia and Herz.": "Europe",
+    "Botswana": "Africa", "Brazil": "South America", "Brunei": "Asia", "Bulgaria": "Europe",
+    "Burkina Faso": "Africa", "Burundi": "Africa", "Cambodia": "Asia", "Cameroon": "Africa",
+    "Canada": "North America", "Central African Rep.": "Africa", "Chad": "Africa", "Chile": "South America",
+    "China": "Asia", "Colombia": "South America", "Congo": "Africa", "Costa Rica": "North America",
+    "Côte d'Ivoire": "Africa", "Croatia": "Europe", "Cuba": "North America", "Cyprus": "Europe",
+    "Czechia": "Europe", "Dem. Rep. Congo": "Africa", "Denmark": "Europe", "Djibouti": "Africa",
+    "Dominican Rep.": "North America", "Ecuador": "South America", "Egypt": "Africa",
+    "El Salvador": "North America", "Eq. Guinea": "Africa", "Eritrea": "Africa", "Estonia": "Europe",
+    "eSwatini": "Africa", "Ethiopia": "Africa", "Falkland Is.": "South America", "Fiji": "Oceania",
+    "Finland": "Europe", "Fr. S. Antarctic Lands": "Antarctica", "France": "Europe", "Gabon": "Africa",
+    "Gambia": "Africa", "Georgia": "Asia", "Germany": "Europe", "Ghana": "Africa", "Greece": "Europe",
+    "Greenland": "North America", "Guatemala": "North America", "Guinea": "Africa", "Guinea-Bissau": "Africa",
+    "Guyana": "South America", "Haiti": "North America", "Honduras": "North America", "Hungary": "Europe",
+    "Iceland": "Europe", "India": "Asia", "Indonesia": "Asia", "Iran": "Asia", "Iraq": "Asia",
+    "Ireland": "Europe", "Israel": "Asia", "Italy": "Europe", "Jamaica": "North America", "Japan": "Asia",
+    "Jordan": "Asia", "Kazakhstan": "Asia", "Kenya": "Africa", "Kosovo": "Europe", "Kuwait": "Asia",
+    "Kyrgyzstan": "Asia", "Laos": "Asia", "Latvia": "Europe", "Lebanon": "Asia", "Lesotho": "Africa",
+    "Liberia": "Africa", "Libya": "Africa", "Lithuania": "Europe", "Luxembourg": "Europe",
+    "Macedonia": "Europe", "Madagascar": "Africa", "Malawi": "Africa", "Malaysia": "Asia", "Mali": "Africa",
+    "Mauritania": "Africa", "Mexico": "North America", "Moldova": "Europe", "Mongolia": "Asia",
+    "Montenegro": "Europe", "Morocco": "Africa", "Mozambique": "Africa", "Myanmar": "Asia",
+    "N. Cyprus": "Asia", "Namibia": "Africa", "Nepal": "Asia", "Netherlands": "Europe",
+    "New Caledonia": "Oceania", "New Zealand": "Oceania", "Nicaragua": "North America", "Niger": "Africa",
+    "Nigeria": "Africa", "North Korea": "Asia", "Norway": "Europe", "Oman": "Asia", "Pakistan": "Asia",
+    "Palestine": "Asia", "Panama": "North America", "Papua New Guinea": "Oceania", "Paraguay": "South America",
+    "Peru": "South America", "Philippines": "Asia", "Poland": "Europe", "Portugal": "Europe",
+    "Puerto Rico": "North America", "Qatar": "Asia", "Romania": "Europe", "Russia": "Europe", "Rwanda": "Africa",
+    "S. Sudan": "Africa", "Saudi Arabia": "Asia", "Senegal": "Africa", "Serbia": "Europe",
+    "Sierra Leone": "Africa", "Slovakia": "Europe", "Slovenia": "Europe", "Solomon Is.": "Oceania",
+    "Somalia": "Africa", "Somaliland": "Africa", "South Africa": "Africa", "South Korea": "Asia",
+    "Spain": "Europe", "Sri Lanka": "Asia", "Sudan": "Africa", "Suriname": "South America", "Sweden": "Europe",
+    "Switzerland": "Europe", "Syria": "Asia", "Taiwan": "Asia", "Tajikistan": "Asia", "Tanzania": "Africa",
+    "Thailand": "Asia", "Timor-Leste": "Asia", "Togo": "Africa", "Trinidad and Tobago": "North America",
+    "Tunisia": "Africa", "Turkey": "Asia", "Turkmenistan": "Asia", "Uganda": "Africa", "Ukraine": "Europe",
+    "United Arab Emirates": "Asia", "United Kingdom": "Europe", "United States of America": "North America",
+    "Uruguay": "South America", "Uzbekistan": "Asia", "Vanuatu": "Oceania", "Venezuela": "South America",
+    "Vietnam": "Asia", "W. Sahara": "Africa", "Yemen": "Asia", "Zambia": "Africa", "Zimbabwe": "Africa"
+};
+
+// Nicer display names + accepted alternative spellings for the tricky ones
+const GEO_EXTRA = {
+    "United States of America": { display: "United States", alts: ["usa", "us", "united states", "america"] },
+    "United Kingdom": { alts: ["uk", "britain", "great britain", "england"] },
+    "United Arab Emirates": { alts: ["uae", "emirates"] },
+    "Bosnia and Herz.": { display: "Bosnia and Herzegovina", alts: ["bosnia", "bosnia and herzegovina", "bosnia herzegovina"] },
+    "Central African Rep.": { display: "Central African Republic", alts: ["central african republic", "car"] },
+    "Dem. Rep. Congo": { display: "DR Congo", alts: ["democratic republic of the congo", "democratic republic of congo", "dr congo", "drc", "congo kinshasa", "zaire"] },
+    "Congo": { display: "Republic of the Congo", alts: ["republic of the congo", "congo brazzaville", "congo", "congo republic"] },
+    "Côte d'Ivoire": { display: "Côte d'Ivoire (Ivory Coast)", alts: ["ivory coast", "cote divoire", "cote d ivoire"] },
+    "Czechia": { alts: ["czech republic", "czechia", "czech"] },
+    "Dominican Rep.": { display: "Dominican Republic", alts: ["dominican republic"] },
+    "Eq. Guinea": { display: "Equatorial Guinea", alts: ["equatorial guinea"] },
+    "eSwatini": { display: "Eswatini", alts: ["eswatini", "swaziland"] },
+    "Macedonia": { display: "North Macedonia", alts: ["north macedonia", "macedonia"] },
+    "Myanmar": { alts: ["myanmar", "burma"] },
+    "S. Sudan": { display: "South Sudan", alts: ["south sudan"] },
+    "Solomon Is.": { display: "Solomon Islands", alts: ["solomon islands", "solomon"] },
+    "Timor-Leste": { display: "Timor-Leste (East Timor)", alts: ["timor leste", "east timor", "timor"] },
+    "Turkey": { alts: ["turkey", "turkiye"] },
+    "Netherlands": { alts: ["netherlands", "holland"] },
+    "Russia": { alts: ["russia", "russian federation"] },
+    "North Korea": { alts: ["north korea", "dprk"] },
+    "South Korea": { alts: ["south korea", "korea"] },
+    "Laos": { alts: ["laos", "lao"] },
+    "Iran": { alts: ["iran", "persia"] },
+    "Vietnam": { alts: ["vietnam", "viet nam"] },
+    "Brunei": { alts: ["brunei", "brunei darussalam"] },
+    "Taiwan": { alts: ["taiwan", "chinese taipei", "republic of china"] },
+    "Palestine": { alts: ["palestine", "palestinian territories"] },
+    "Trinidad and Tobago": { alts: ["trinidad and tobago", "trinidad"] },
+    "Cyprus": { alts: ["cyprus"] }
+};
+
+// Geo state
+let geoInited = false, geoLoaded = false;
+let geoFeatures = null, geoProjection = null, geoPath = null, geoSvg = null, geoG = null, geoZoom = null;
+let geoAnswerMap = null, geoAllNames = null, geoState = null, geoTimerId = null;
+
+function initGeoGame() {
+    if (geoInited) return;
+    geoInited = true;
+    wireGeoControls();
+    loadGeoMap();
+}
+
+function loadScriptOnce(src, check) {
+    return new Promise((resolve, reject) => {
+        if (check && check()) return resolve();
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('Failed to load ' + src));
+        document.head.appendChild(s);
+    });
+}
+
+async function loadGeoMap() {
+    const loadingEl = document.getElementById('geo-loading');
+    try {
+        await loadScriptOnce('https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js', () => window.d3);
+        await loadScriptOnce('https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js', () => window.topojson);
+
+        const res = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const topo = await res.json();
+        geoFeatures = window.topojson.feature(topo, topo.objects.countries).features;
+
+        buildGeoMap();
+        buildGeoAnswers();
+        geoLoaded = true;
+        if (loadingEl) loadingEl.style.display = 'none';
+        document.getElementById('geo-input').disabled = false;
+        startGeoGame('World');
+    } catch (err) {
+        console.error('Geo load failed', err);
+        if (loadingEl) {
+            loadingEl.innerHTML =
+                '<span style="color:#ff6b6b;text-align:center;padding:1rem;line-height:1.5">' +
+                'Could not load the world map.<br>Check your internet connection,<br>then reopen this tab.</span>';
+        }
+    }
+}
+
+function buildGeoMap() {
+    const d3 = window.d3;
+    geoProjection = d3.geoNaturalEarth1()
+        .fitExtent([[8, 8], [GEO_W - 8, GEO_H - 8]], { type: 'FeatureCollection', features: geoFeatures });
+    geoPath = d3.geoPath(geoProjection);
+
+    geoSvg = d3.select('#geo-map').append('svg')
+        .attr('class', 'geo-svg')
+        .attr('viewBox', `0 0 ${GEO_W} ${GEO_H}`)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+    geoSvg.append('rect').attr('class', 'geo-ocean').attr('width', GEO_W).attr('height', GEO_H);
+
+    geoG = geoSvg.append('g').attr('class', 'geo-layer');
+    geoG.selectAll('path')
+        .data(geoFeatures).enter().append('path')
+        .attr('class', 'geo-country')
+        .attr('d', geoPath);
+
+    geoZoom = d3.zoom()
+        .scaleExtent([1, 18])
+        .translateExtent([[0, 0], [GEO_W, GEO_H]])
+        .on('zoom', ev => geoG.attr('transform', ev.transform));
+    geoSvg.call(geoZoom).on('dblclick.zoom', null);
+}
+
+function geoNorm(s) {
+    const COMBINING = new RegExp('[' + String.fromCharCode(0x300) + '-' + String.fromCharCode(0x36f) + ']', 'g');
+    return s.toLowerCase()
+        .normalize('NFD').replace(COMBINING, '')
+        .replace(/[.\-']/g, ' ')
+        .replace(/[^a-z0-9 ]/g, '')
+        .replace(/\s+/g, ' ').trim()
+        .replace(/^the /, '');
+}
+
+function geoDisplay(name) {
+    const ex = GEO_EXTRA[name];
+    return (ex && ex.display) ? ex.display : name;
+}
+
+// Primary clean name (no parenthetical) for letter hints
+function geoPrimary(name) {
+    const ex = GEO_EXTRA[name];
+    if (ex && ex.display) return ex.display.replace(/\s*\(.*\)\s*/, '').trim();
+    return name;
+}
+
+function buildGeoAnswers() {
+    geoAnswerMap = {};
+    geoFeatures.forEach(f => {
+        const name = f.properties.name;
+        const ex = GEO_EXTRA[name] || {};
+        const accepted = new Set();
+        accepted.add(name);
+        if (ex.display) accepted.add(ex.display);
+        (ex.alts || []).forEach(a => accepted.add(a));
+        accepted.forEach(a => { geoAnswerMap[geoNorm(a)] = name; });
+    });
+
+    geoAllNames = geoFeatures
+        .filter(f => !GEO_EXCLUDE.has(f.properties.name))
+        .map(f => { const d = geoDisplay(f.properties.name); return { display: d, norm: geoNorm(d) }; })
+        .sort((a, b) => a.display.localeCompare(b.display));
+}
+
+function geoBuildPool(region) {
+    return geoFeatures
+        .map(f => f.properties.name)
+        .filter(n => !GEO_EXCLUDE.has(n))
+        .filter(n => region === 'World' || GEO_CONTINENT[n] === region);
+}
+
+function geoShuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function startGeoGame(region) {
+    if (!geoLoaded) return;
+    region = region || 'World';
+    const pool = geoBuildPool(region);
+    geoState = {
+        region, pool,
+        queue: geoShuffle(pool.slice()),
+        guessed: new Set(),
+        current: null,
+        score: 0, streak: 0, best: 0, correct: 0, wrong: 0, hintLevel: 0,
+        startTime: Date.now()
+    };
+
+    document.querySelectorAll('.geo-region').forEach(b => b.classList.toggle('active', b.dataset.region === region));
+    geoG.selectAll('path.geo-country').classed('done', false).classed('target', false);
+    document.getElementById('geo-win').classList.add('hidden');
+    const inp = document.getElementById('geo-input');
+    inp.disabled = false;
+    inp.value = '';
+
+    clearInterval(geoTimerId);
+    geoTimerId = setInterval(geoTick, 1000);
+    geoTick();
+
+    updateGeoStats();
+    updateGeoProgress();
+    geoNext();
+}
+
+function geoNext() {
+    geoFeedback('', '');
+    geoState.hintLevel = 0;
+    document.getElementById('geo-hint-list').innerHTML = '';
+    const inp = document.getElementById('geo-input');
+    inp.value = '';
+    geoClearSuggest();
+
+    if (geoState.queue.length === 0) { geoWin(); return; }
+
+    geoState.current = geoState.queue[0];
+    geoG.selectAll('path.geo-country').classed('target', d => d.properties.name === geoState.current);
+    geoFocus(geoState.current);
+    updateGeoProgress();
+    inp.focus();
+}
+
+function geoSubmit() {
+    if (!geoState || !geoState.current || !geoLoaded) return;
+    const raw = document.getElementById('geo-input').value.trim();
+    if (!raw) return;
+    const matched = geoAnswerMap[geoNorm(raw)];
+    if (matched === geoState.current) geoCorrect();
+    else geoWrong(matched);
+}
+
+function geoCorrect() {
+    const name = geoState.current;
+    geoState.guessed.add(name);
+    geoState.correct++;
+    const pts = Math.max(20, 100 - geoState.hintLevel * 30);
+    geoState.score += pts;
+    geoState.streak++;
+    if (geoState.streak > geoState.best) geoState.best = geoState.streak;
+
+    geoG.selectAll('path.geo-country')
+        .filter(d => d.properties.name === name)
+        .classed('done', true).classed('target', false);
+
+    geoFeedback(`✓ ${geoDisplay(name)}  +${pts}`, 'ok');
+    geoBlip(true);
+
+    geoState.queue.shift();
+    document.getElementById('geo-input').value = '';
+    geoClearSuggest();
+    updateGeoStats();
+    updateGeoProgress();
+    setTimeout(() => { if (geoState) geoNext(); }, 750);
+}
+
+function geoWrong(matched) {
+    geoState.wrong++;
+    geoState.streak = 0;
+    geoFeedback(
+        (matched && matched !== geoState.current)
+            ? `✗ That's ${geoDisplay(matched)} — not it. Try again!`
+            : '✗ Nope, try again!',
+        'bad'
+    );
+    const inp = document.getElementById('geo-input');
+    inp.classList.remove('shake');
+    void inp.offsetWidth;
+    inp.classList.add('shake');
+    geoBlip(false);
+    updateGeoStats();
+}
+
+function geoSkip() {
+    if (!geoState || !geoState.current) return;
+    if (geoState.queue.length <= 1) {
+        geoFeedback('Last one — you have to name it!', '');
+        return;
+    }
+    geoState.streak = 0;
+    geoState.queue.push(geoState.queue.shift());
+    geoNext();
+    geoFeedback("↷ Skipped — we'll come back to it.", '');
+}
+
+function geoHint() {
+    if (!geoState || !geoState.current || geoState.hintLevel >= 3) return;
+    const name = geoState.current;
+    const prim = geoPrimary(name);
+    geoState.hintLevel++;
+    let html = '';
+    if (geoState.hintLevel === 1) {
+        html = `🌍 Continent: <b>${GEO_CONTINENT[name] || '—'}</b>`;
+    } else if (geoState.hintLevel === 2) {
+        const letters = prim.replace(/[^a-zA-Z]/g, '').length;
+        html = `🔤 Starts with <b>${prim[0].toUpperCase()}</b> · <b>${letters}</b> letters`;
+    } else {
+        html = `👁 <b style="letter-spacing:2px">${geoMask(prim)}</b>`;
+    }
+    const li = document.createElement('li');
+    li.innerHTML = html;
+    document.getElementById('geo-hint-list').appendChild(li);
+}
+
+function geoMask(s) {
+    return s.split('').map((ch, i) => (/[a-zA-Z]/.test(ch) ? (i % 2 === 0 ? ch : '_') : ch)).join(' ');
+}
+
+function geoWin() {
+    clearInterval(geoTimerId);
+    document.getElementById('geo-input').disabled = true;
+    geoG.selectAll('path.geo-country').classed('target', false);
+    const label = geoState.region === 'World' ? 'countries' : (geoState.region + ' countries');
+    document.getElementById('geo-win-text').innerHTML =
+        `You named all <b>${geoState.pool.length}</b> ${label} in <b>${fmtTime(Date.now() - geoState.startTime)}</b>.<br>` +
+        `Score <b>${geoState.score}</b> · Best streak <b>${geoState.best}</b>.`;
+    document.getElementById('geo-win').classList.remove('hidden');
+    geoBlip(true);
+}
+
+function geoFocus(name) {
+    if (!geoSvg) return;
+    const d3 = window.d3;
+    const f = geoFeatures.find(x => x.properties.name === name);
+    if (!f) return;
+    const b = geoPath.bounds(f);
+    const w = Math.max(1, b[1][0] - b[0][0]);
+    const h = Math.max(1, b[1][1] - b[0][1]);
+    const cx = (b[0][0] + b[1][0]) / 2;
+    const cy = (b[0][1] + b[1][1]) / 2;
+    let scale = 0.55 / Math.max(w / GEO_W, h / GEO_H);
+    scale = Math.max(1.2, Math.min(12, scale));
+    const tx = GEO_W / 2 - scale * cx;
+    const ty = GEO_H / 2 - scale * cy;
+    geoSvg.transition().duration(800).call(geoZoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+function geoWorldView() {
+    if (!geoSvg) return;
+    geoSvg.transition().duration(700).call(geoZoom.transform, window.d3.zoomIdentity);
+}
+
+function geoFeedback(msg, cls) {
+    const f = document.getElementById('geo-feedback');
+    f.textContent = msg;
+    f.className = 'geo-feedback ' + (cls || '');
+}
+
+function updateGeoProgress() {
+    const total = geoState.pool.length;
+    const done = geoState.guessed.size;
+    document.getElementById('geo-prog-fill').style.width = (total ? (done / total * 100) : 0) + '%';
+    document.getElementById('geo-prog-text').textContent = `${done} / ${total}`;
+}
+
+function updateGeoStats() {
+    document.getElementById('geo-score').textContent = geoState.score;
+    document.getElementById('geo-streak').textContent = geoState.streak;
+    const t = geoState.correct + geoState.wrong;
+    document.getElementById('geo-acc').textContent = (t ? Math.round(geoState.correct / t * 100) : 100) + '%';
+}
+
+function geoTick() {
+    if (!geoState) return;
+    document.getElementById('geo-timer').textContent = fmtTime(Date.now() - geoState.startTime);
+}
+
+function fmtTime(ms) {
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(s / 60);
+    return m + ':' + String(s % 60).padStart(2, '0');
+}
+
+function geoBlip(ok) {
+    if (!audioContext) return;
+    try {
+        const o = audioContext.createOscillator();
+        const g = audioContext.createGain();
+        o.type = ok ? 'triangle' : 'sawtooth';
+        const t0 = audioContext.currentTime;
+        if (ok) {
+            o.frequency.setValueAtTime(660, t0);
+            o.frequency.exponentialRampToValueAtTime(990, t0 + 0.18);
+        } else {
+            o.frequency.setValueAtTime(160, t0);
+        }
+        g.gain.setValueAtTime(0.15, t0);
+        g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.25);
+        o.connect(g); g.connect(audioContext.destination);
+        o.start(t0); o.stop(t0 + 0.26);
+    } catch (e) { /* no-op */ }
+}
+
+function geoSuggestUpdate() {
+    const ul = document.getElementById('geo-suggest');
+    const v = geoNorm(document.getElementById('geo-input').value);
+    if (!v || !geoAllNames) { geoClearSuggest(); return; }
+    const matches = geoAllNames
+        .filter(o => o.norm.includes(v))
+        .sort((a, b) => (a.norm.startsWith(v) ? 0 : 1) - (b.norm.startsWith(v) ? 0 : 1) || a.display.localeCompare(b.display))
+        .slice(0, 6);
+    if (!matches.length) { geoClearSuggest(); return; }
+    ul.innerHTML = matches.map(o => `<li data-name="${o.display.replace(/"/g, '&quot;')}">${o.display}</li>`).join('');
+    ul.classList.add('open');
+}
+
+function geoClearSuggest() {
+    const ul = document.getElementById('geo-suggest');
+    if (!ul) return;
+    ul.innerHTML = '';
+    ul.classList.remove('open');
+}
+
+function wireGeoControls() {
+    document.getElementById('geo-submit').addEventListener('click', geoSubmit);
+    document.getElementById('geo-hint').addEventListener('click', geoHint);
+    document.getElementById('geo-skip').addEventListener('click', geoSkip);
+    document.getElementById('geo-restart').addEventListener('click', () => startGeoGame(geoState ? geoState.region : 'World'));
+
+    const inp = document.getElementById('geo-input');
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); geoSubmit(); } });
+    inp.addEventListener('input', geoSuggestUpdate);
+    inp.addEventListener('blur', () => setTimeout(geoClearSuggest, 150));
+
+    document.getElementById('geo-suggest').addEventListener('mousedown', e => {
+        const li = e.target.closest('li');
+        if (!li) return;
+        e.preventDefault();
+        inp.value = li.dataset.name;
+        geoClearSuggest();
+        geoSubmit();
+    });
+
+    document.querySelectorAll('.geo-region').forEach(b => {
+        b.addEventListener('click', () => { if (geoLoaded) startGeoGame(b.dataset.region); });
+    });
+
+    document.getElementById('geo-zoom-in').addEventListener('click', () => { if (geoSvg) geoSvg.transition().duration(250).call(geoZoom.scaleBy, 1.6); });
+    document.getElementById('geo-zoom-out').addEventListener('click', () => { if (geoSvg) geoSvg.transition().duration(250).call(geoZoom.scaleBy, 1 / 1.6); });
+    document.getElementById('geo-world').addEventListener('click', geoWorldView);
+    document.getElementById('geo-locate').addEventListener('click', () => { if (geoState && geoState.current) geoFocus(geoState.current); });
+}
