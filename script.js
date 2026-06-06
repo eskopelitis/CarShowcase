@@ -1236,6 +1236,7 @@ init();
 
 setupMainTabs();
 setupPingas();
+setupSoundboard();
 
 // ---- Tab navigation ----
 function getMenuPanels() {
@@ -1306,6 +1307,58 @@ function spawnPingasFloat(btn) {
     f.style.left = (25 + Math.random() * 50) + '%';
     wrap.appendChild(f);
     setTimeout(() => f.remove(), 1100);
+}
+
+// ---- SOUNDBOARD ----
+function setupSoundboard() {
+    const board = document.getElementById('soundboard');
+    if (!board) return;
+
+    // start/duration in seconds; omit for full-length playback
+    const SOUNDS = {
+        'pingas': { src: 'Pingas Sound Effect.mp3' },
+        'pingas-song': { src: 'pingas song.mp3', start: 3, duration: 10 },
+        'goku': { src: "Hey it's me Goku Sound Effect - Dragon Ball.mp3" }
+    };
+
+    // Warm up files so the first tap is snappy
+    Object.values(SOUNDS).forEach(s => {
+        const p = new Audio(encodeURI(s.src));
+        p.preload = 'auto';
+    });
+
+    board.querySelectorAll('.sound-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cfg = SOUNDS[btn.getAttribute('data-sound')];
+            if (!cfg) return;
+
+            // Fresh element every click so rapid taps overlap
+            const a = new Audio(encodeURI(cfg.src));
+            a.volume = 1.0;
+            const begin = cfg.start || 0;
+            const end = cfg.duration ? begin + cfg.duration : null;
+
+            if (end !== null) {
+                a.addEventListener('timeupdate', () => {
+                    if (a.currentTime >= end) a.pause();
+                });
+            }
+
+            if (begin > 0) {
+                // Seek once metadata is ready, then play from the clip point
+                a.addEventListener('loadedmetadata', () => {
+                    try { a.currentTime = begin; } catch (e) { }
+                    a.play().catch(() => { });
+                });
+            } else {
+                a.play().catch(() => { });
+            }
+
+            btn.classList.remove('pop');
+            void btn.offsetWidth;
+            btn.classList.add('pop');
+        });
+    });
 }
 
 /* ============================================================

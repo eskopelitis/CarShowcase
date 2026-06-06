@@ -1913,6 +1913,89 @@ model-viewer {
     }
 }
 
+/* ---- SOUNDBOARD ---- */
+.soundboard {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 1rem;
+    margin-top: 0.4rem;
+    width: 100%;
+    max-width: 560px;
+}
+
+.sound-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 130px;
+    flex: 1 1 130px;
+    padding: 1rem 1.2rem;
+    border-radius: 14px;
+    border: 2px solid #ff2b2b;
+    background: rgba(20, 0, 0, 0.6);
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 0 18px rgba(255, 43, 43, 0.25);
+    transition: box-shadow 0.2s, transform 0.08s, background 0.2s;
+}
+
+.sound-btn:hover {
+    background: rgba(40, 0, 0, 0.75);
+    box-shadow: 0 0 28px rgba(255, 43, 43, 0.55);
+}
+
+.sound-btn:active {
+    transform: scale(0.95);
+}
+
+.sound-btn.pop {
+    animation: pingasPop 0.25s;
+}
+
+.sound-ico {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.sound-label {
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.sound-label small {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-grey);
+    letter-spacing: 1px;
+}
+
+.goku-btn img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ff2b2b;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+body.light-mode .sound-btn {
+    background: rgba(255, 240, 240, 0.85);
+    color: #111;
+}
+
+body.light-mode .sound-btn:hover {
+    background: rgba(255, 220, 220, 0.95);
+}
+
 /* ============================================================
    RESPONSIVE — Tabs / Geo / Pingas
    ============================================================ */
